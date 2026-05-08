@@ -1,0 +1,46 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Xcode build products
+build/
+DerivedData/
+*.moved-aside
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# CocoaPods / Carthage
+Pods/
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace/
+
+# Editor and local environment
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+*.log
