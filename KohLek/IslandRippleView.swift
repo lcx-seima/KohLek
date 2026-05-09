@@ -31,7 +31,7 @@ struct IslandRippleView: View {
     }
 
     private func draw(context: GraphicsContext, size: CGSize, date: Date) {
-        let style = RippleStyle(stage: model.loadStage)
+        let style = RippleStyle(stage: model.loadStage, theme: model.animationTheme)
         let islandRect = islandFrame
         let time = date.timeIntervalSinceReferenceDate
 
@@ -64,7 +64,7 @@ struct IslandRippleView: View {
                 leftCornerRadius: max(leftCornerRadius - 1.2, 2),
                 rightCornerRadius: max(rightCornerRadius - 1.2, 2)
             ),
-            with: .color(.white.opacity(style.innerHighlightOpacity)),
+            with: .color(style.innerHighlightColor.opacity(style.innerHighlightOpacity)),
             lineWidth: 0.9
         )
     }
@@ -116,7 +116,7 @@ struct IslandRippleView: View {
             )
             context.stroke(
                 segment,
-                with: .color(.white.opacity(0.72)),
+                with: .color(style.innerHighlightColor.opacity(0.72)),
                 style: StrokeStyle(lineWidth: 1.05, lineCap: .round, lineJoin: .round)
             )
         }
@@ -158,7 +158,7 @@ struct IslandRippleView: View {
                     leftCornerRadius: max(leftCornerRadius - 1.6 * press, 2),
                     rightCornerRadius: max(rightCornerRadius - 1.6 * press, 2)
                 ),
-                with: .color(.white.opacity(0.42 * press)),
+                with: .color(style.innerHighlightColor.opacity(0.42 * press)),
                 lineWidth: 1.1
             )
         }
@@ -213,11 +213,12 @@ struct IslandRippleView: View {
     }
 }
 
-private struct RippleStyle {
+struct RippleStyle {
     let borderPrimary: Color
     let borderSecondary: Color
     let borderGlow: Color
     let waveColor: Color
+    let innerHighlightColor: Color
     let cycle: Double
     let expansion: Double
     let waveOpacity: Double
@@ -228,13 +229,16 @@ private struct RippleStyle {
     let neonCycle: Double
     let neonSegmentLength: Double
 
-    init(stage: LoadStage) {
+    init(stage: LoadStage, theme: CPUAnimationTheme = .defaults) {
+        let themeColor = theme.color(for: stage)
+        borderPrimary = themeColor.color
+        borderSecondary = themeColor.adjusted(saturationMultiplier: 1.28, brightnessMultiplier: 0.72).color
+        borderGlow = themeColor.adjusted(saturationMultiplier: 1.16, brightnessMultiplier: 0.94).color
+        waveColor = themeColor.adjusted(saturationMultiplier: 1.08, brightnessMultiplier: 0.9).color
+        innerHighlightColor = themeColor.adjusted(saturationMultiplier: 0.22, brightnessMultiplier: 1.12).color
+
         switch stage {
         case .low:
-            borderPrimary = Color(red: 0.56, green: 0.86, blue: 1.0)
-            borderSecondary = Color(red: 0.22, green: 0.48, blue: 0.95)
-            borderGlow = Color(red: 0.24, green: 0.62, blue: 1.0)
-            waveColor = Color(red: 0.35, green: 0.74, blue: 1.0)
             cycle = 5.2
             expansion = 18
             waveOpacity = 0.22
@@ -242,13 +246,9 @@ private struct RippleStyle {
             layerCount = 2
             idleGap = 2.8
             innerHighlightOpacity = 0.48
-            neonCycle = 4.2
+            neonCycle = 4.2 / theme.glowSpeedMultiplier
             neonSegmentLength = 0.16
         case .medium:
-            borderPrimary = Color(red: 1.0, green: 0.74, blue: 0.28)
-            borderSecondary = Color(red: 1.0, green: 0.30, blue: 0.20)
-            borderGlow = Color(red: 1.0, green: 0.48, blue: 0.20)
-            waveColor = Color(red: 1.0, green: 0.46, blue: 0.22)
             cycle = 2.55
             expansion = 24
             waveOpacity = 0.32
@@ -256,13 +256,9 @@ private struct RippleStyle {
             layerCount = 3
             idleGap = 0
             innerHighlightOpacity = 0.42
-            neonCycle = 3.2
+            neonCycle = 3.2 / theme.glowSpeedMultiplier
             neonSegmentLength = 0.15
         case .high:
-            borderPrimary = Color(red: 1.0, green: 0.42, blue: 0.34)
-            borderSecondary = Color(red: 0.95, green: 0.08, blue: 0.12)
-            borderGlow = Color(red: 1.0, green: 0.16, blue: 0.18)
-            waveColor = Color(red: 1.0, green: 0.20, blue: 0.16)
             cycle = 1.55
             expansion = 31
             waveOpacity = 0.42
@@ -270,7 +266,7 @@ private struct RippleStyle {
             layerCount = 4
             idleGap = 0
             innerHighlightOpacity = 0.38
-            neonCycle = 2.55
+            neonCycle = 2.55 / theme.glowSpeedMultiplier
             neonSegmentLength = 0.14
         }
     }
