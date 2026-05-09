@@ -51,25 +51,7 @@ struct IslandRippleView: View {
             )
         }
 
-        let glowRect = usesDetectedNotch
-            ? islandRect.insetBy(dx: -1.8, dy: 0).offsetBy(dx: 0, dy: 1.1)
-            : islandRect.insetBy(dx: -2, dy: -2)
-        var glowContext = context
-        glowContext.addFilter(.shadow(color: style.borderGlow.opacity(0.42), radius: 5, x: 0, y: 0))
-        glowContext.stroke(
-            islandPath(in: glowRect, leftCornerRadius: leftCornerRadius + 1.4, rightCornerRadius: rightCornerRadius + 1.4),
-            with: .color(style.borderGlow.opacity(0.38)),
-            lineWidth: 5.2
-        )
-        context.stroke(
-            islandPath(in: islandRect, leftCornerRadius: leftCornerRadius, rightCornerRadius: rightCornerRadius),
-            with: .linearGradient(
-                Gradient(colors: [style.borderPrimary, style.borderSecondary, style.borderPrimary]),
-                startPoint: CGPoint(x: islandRect.minX, y: islandRect.minY),
-                endPoint: CGPoint(x: islandRect.maxX, y: islandRect.maxY)
-            ),
-            lineWidth: 2.35
-        )
+        drawNeonBorder(context: context, style: style, islandRect: islandRect, time: time)
 
         drawFeedbackPulse(context: context, style: style, islandRect: islandRect, time: time)
 
@@ -85,6 +67,59 @@ struct IslandRippleView: View {
             with: .color(.white.opacity(style.innerHighlightOpacity)),
             lineWidth: 0.9
         )
+    }
+
+    private func drawNeonBorder(
+        context: GraphicsContext,
+        style: RippleStyle,
+        islandRect: CGRect,
+        time: TimeInterval
+    ) {
+        let borderPath = islandPath(in: islandRect, leftCornerRadius: leftCornerRadius, rightCornerRadius: rightCornerRadius)
+
+        context.stroke(
+            borderPath,
+            with: .linearGradient(
+                Gradient(colors: [
+                    style.borderPrimary.opacity(0.74),
+                    style.borderSecondary.opacity(0.52),
+                    style.borderPrimary.opacity(0.74)
+                ]),
+                startPoint: CGPoint(x: islandRect.minX, y: islandRect.minY),
+                endPoint: CGPoint(x: islandRect.maxX, y: islandRect.maxY)
+            ),
+            style: StrokeStyle(lineWidth: 2.05, lineCap: .round, lineJoin: .round)
+        )
+
+        let rawPhase = IslandBorderLightAnimation.phase(time: time, duration: style.neonCycle)
+        let breathingPhase = IslandBorderLightAnimation.breathingPhase(rawPhase)
+        let center = IslandBorderLightAnimation.counterclockwisePhase(clockwisePhase: breathingPhase)
+        let ranges = IslandBorderLightAnimation.segmentRanges(center: center, length: style.neonSegmentLength)
+
+        var glowContext = context
+        glowContext.addFilter(.shadow(color: style.borderGlow.opacity(0.72), radius: 6, x: 0, y: 0))
+        for range in ranges {
+            let segment = borderPath.trimmedPath(from: range.start, to: range.end)
+            glowContext.stroke(
+                segment,
+                with: .color(style.borderGlow.opacity(0.58)),
+                style: StrokeStyle(lineWidth: 4.8, lineCap: .round, lineJoin: .round)
+            )
+        }
+
+        for range in ranges {
+            let segment = borderPath.trimmedPath(from: range.start, to: range.end)
+            context.stroke(
+                segment,
+                with: .color(style.borderPrimary),
+                style: StrokeStyle(lineWidth: 2.9, lineCap: .round, lineJoin: .round)
+            )
+            context.stroke(
+                segment,
+                with: .color(.white.opacity(0.72)),
+                style: StrokeStyle(lineWidth: 1.05, lineCap: .round, lineJoin: .round)
+            )
+        }
     }
 
     private func drawFeedbackPulse(
@@ -190,6 +225,8 @@ private struct RippleStyle {
     let layerCount: Int
     let idleGap: Double
     let innerHighlightOpacity: Double
+    let neonCycle: Double
+    let neonSegmentLength: Double
 
     init(stage: LoadStage) {
         switch stage {
@@ -205,6 +242,8 @@ private struct RippleStyle {
             layerCount = 2
             idleGap = 2.8
             innerHighlightOpacity = 0.48
+            neonCycle = 4.2
+            neonSegmentLength = 0.16
         case .medium:
             borderPrimary = Color(red: 1.0, green: 0.74, blue: 0.28)
             borderSecondary = Color(red: 1.0, green: 0.30, blue: 0.20)
@@ -217,6 +256,8 @@ private struct RippleStyle {
             layerCount = 3
             idleGap = 0
             innerHighlightOpacity = 0.42
+            neonCycle = 3.2
+            neonSegmentLength = 0.15
         case .high:
             borderPrimary = Color(red: 1.0, green: 0.42, blue: 0.34)
             borderSecondary = Color(red: 0.95, green: 0.08, blue: 0.12)
@@ -229,6 +270,8 @@ private struct RippleStyle {
             layerCount = 4
             idleGap = 0
             innerHighlightOpacity = 0.38
+            neonCycle = 2.55
+            neonSegmentLength = 0.14
         }
     }
 

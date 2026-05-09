@@ -45,7 +45,7 @@ struct IslandOverlayMetrics: Equatable {
                 height: notchRect.height
             )
 
-            let cornerRadius = min(notchRect.height * 0.42, notchRect.width * 0.18)
+            let cornerRadius = min(notchRect.height * 0.32, notchRect.width * 0.14)
 
             return IslandOverlayMetrics(
                 islandFrameInPanel: islandFrame,

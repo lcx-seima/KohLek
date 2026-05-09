@@ -14,8 +14,8 @@ struct IslandOverlayMetricsTests {
         #expect(metrics.islandFrameInPanel == CGRect(x: 48, y: 0, width: 162, height: 38))
         #expect(metrics.panelFrame == CGRect(x: 627, y: 894, width: 258, height: 88))
         #expect(metrics.islandHitFrameInScreen == CGRect(x: 675, y: 944, width: 162, height: 38))
-        #expect(abs(metrics.cornerRadius - 15.96) < 0.001)
-        #expect(abs(metrics.rightCornerRadius - 15.96) < 0.001)
+        #expect(abs(metrics.cornerRadius - 12.16) < 0.001)
+        #expect(abs(metrics.rightCornerRadius - 12.16) < 0.001)
     }
 
     @Test func fallsBackToCenteredIslandWhenNoNotchAreasExist() {
